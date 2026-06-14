@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>许愿盒 — Wishing Box</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Settings Button -->
+  <button id="settings-btn" class="settings-btn" title="设置">⚙️</button>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>设置</h2>
+      <label>
+        API Base URL
+        <input type="text" id="cfg-base-url" placeholder="https://api.openai.com/v1">
+        <small style="color:#999;margin-top:2px;display:block">只填到 /v1，不要包含 /chat/completions</small>
+      </label>
+      <label>
+        API Key（可选）
+        <input type="password" id="cfg-api-key" placeholder="留空则不发送 Authorization 头">
+      </label>
+      <label>
+        模型名称
+        <input type="text" id="cfg-model" placeholder="gpt-4o">
+      </label>
+      <div class="modal-actions">
+        <button id="settings-save" class="btn btn-primary">保存</button>
+        <button id="settings-cancel" class="btn">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen: Home / Search -->
+  <div id="screen-home" class="screen screen-home">
+    <div class="home-center">
+      <h1 class="title">🎁 许愿盒</h1>
+      <p class="subtitle">告诉我你想要什么，剩下的交给想象力</p>
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="描述你想要的应用……" autocomplete="off">
+        <button id="search-btn" class="btn btn-primary">
+          <span class="search-btn-text">搜索</span>
+          <span class="spinner hidden"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen: Candidates -->
+  <div id="screen-candidates" class="screen screen-candidates hidden">
+    <div class="candidates-header">
+      <div class="search-bar">
+        <input type="text" id="search-input-top" placeholder="描述你想要的应用……" autocomplete="off">
+        <button id="search-btn-top" class="btn btn-primary">
+          <span class="search-btn-text">搜索</span>
+          <span class="spinner hidden"></span>
+        </button>
+      </div>
+    </div>
+    <div id="candidates-grid" class="candidates-grid"></div>
+    <div class="candidates-footer">
+      <button id="refresh-btn" class="btn btn-secondary">
+        <span class="refresh-btn-text">🔄 换一批</span>
+        <span class="spinner hidden"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Screen: App -->
+  <div id="screen-app" class="screen screen-app hidden">
+    <div class="app-header">
+      <button id="back-btn" class="btn btn-icon" title="返回">←</button>
+      <span id="app-title" class="app-title"></span>
+    </div>
+    <div class="app-container">
+      <iframe id="app-iframe" sandbox="allow-same-origin"></iframe>
+      <div id="app-loading" class="app-loading hidden">
+        <div class="spinner large"></div>
+        <p>正在生成应用……</p>
+      </div>
+      <div id="app-interacting" class="app-interacting hidden">
+        <div class="spinner small"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Toast -->
+  <div id="error-toast" class="error-toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
