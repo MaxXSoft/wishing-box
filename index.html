@@ -33,6 +33,10 @@
         <textarea id="cfg-extra-params" placeholder='{"thinking": {"type": "disabled"}}' rows="5" spellcheck="false"></textarea>
         <small style="color:#999;margin-top:2px;display:block">可选的 JSON 对象，会合并到请求体中。例如非官方 API 的思考模式开关</small>
       </label>
+      <label class="cfg-checkbox-label">
+        <input type="checkbox" id="cfg-skip-spec">
+        跳过规格说明步骤，直接生成 HTML（速度更快，但复杂应用质量可能下降）
+      </label>
       <div class="modal-actions">
         <button id="settings-save" class="btn btn-primary">保存</button>
         <button id="settings-cancel" class="btn">取消</button>

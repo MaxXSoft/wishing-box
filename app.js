@@ -24,6 +24,7 @@
       apiKey: cfg.apiKey || '',
       model: cfg.model || 'gpt-4o',
       extraParams: cfg.extraParams || {},
+      skipSpec: cfg.skipSpec || false,
     };
   }
 
@@ -39,6 +40,7 @@
     cfgApiKey: $('#cfg-api-key'),
     cfgModel: $('#cfg-model'),
     cfgExtraParams: $('#cfg-extra-params'),
+    cfgSkipSpec: $('#cfg-skip-spec'),
     settingsSave: $('#settings-save'),
     settingsCancel: $('#settings-cancel'),
 
@@ -91,6 +93,7 @@
     els.cfgApiKey.value = cfg.apiKey || '';
     els.cfgModel.value = cfg.model || '';
     els.cfgExtraParams.value = cfg.extraParams ? JSON.stringify(cfg.extraParams, null, 2) : '';
+    els.cfgSkipSpec.checked = cfg.skipSpec || false;
     els.settingsModal.classList.remove('hidden');
   }
 
@@ -123,6 +126,7 @@
       apiKey: els.cfgApiKey.value.trim(),
       model: els.cfgModel.value.trim(),
       extraParams: extraRaw ? extraParams : undefined,
+      skipSpec: els.cfgSkipSpec.checked,
     });
     closeSettings();
   });
@@ -218,6 +222,17 @@ Write a detailed specification in plain text (a few hundred words). Use the same
     return `Now generate the complete HTML document based on the specification above.
 
 The HTML should be rich, detailed, and visually polished — include all the content, sections, and interactive elements described in the spec. Make it look like a real application, not a skeleton.
+
+Respond with ONLY the raw HTML (starting with <!DOCTYPE html> or <html>). No markdown fences, no explanations.`;
+  }
+
+  function buildDirectHtmlPrompt(app) {
+    return `Generate a complete HTML document for the following app:
+
+App name: ${app.icon} ${app.name}
+App description: ${app.description}
+
+The HTML should be rich, detailed, and visually polished — include realistic content, clear sections, and appropriate interactive elements. Make it look like a real application, not a skeleton.
 
 Respond with ONLY the raw HTML (starting with <!DOCTYPE html> or <html>). No markdown fences, no explanations.`;
   }
@@ -342,17 +357,26 @@ Rules:
     els.appIframe.srcdoc = '';
 
     try {
+      const cfg = getConfig();
       const messages = [{ role: 'system', content: SYSTEM_APP }];
+      let html;
 
-      const specUserMsg = { role: 'user', content: buildSpecPrompt(app) };
-      messages.push(specUserMsg);
-      const spec = await callLLM(messages);
-      const specAssistantMsg = { role: 'assistant', content: spec };
-      messages.push(specAssistantMsg);
+      if (cfg.skipSpec) {
+        const htmlUserMsg = { role: 'user', content: buildDirectHtmlPrompt(app) };
+        messages.push(htmlUserMsg);
+        html = await callLLM(messages);
+      } else {
+        const specUserMsg = { role: 'user', content: buildSpecPrompt(app) };
+        messages.push(specUserMsg);
+        const spec = await callLLM(messages);
+        const specAssistantMsg = { role: 'assistant', content: spec };
+        messages.push(specAssistantMsg);
 
-      const htmlUserMsg = { role: 'user', content: buildHtmlPrompt() };
-      messages.push(htmlUserMsg);
-      const html = await callLLM(messages);
+        const htmlUserMsg = { role: 'user', content: buildHtmlPrompt() };
+        messages.push(htmlUserMsg);
+        html = await callLLM(messages);
+      }
+
       const htmlAssistantMsg = { role: 'assistant', content: html };
       messages.push(htmlAssistantMsg);
 
