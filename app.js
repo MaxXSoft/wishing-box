@@ -356,7 +356,7 @@ Rules:
       const htmlAssistantMsg = { role: 'assistant', content: html };
       messages.push(htmlAssistantMsg);
 
-      state.currentHtml = stripScripts(html);
+      state.currentHtml = stripScripts(stripFences(html));
       state.conversation = messages;
       renderAppHtml();
     } catch (err) {
@@ -486,11 +486,18 @@ Rules:
     const html = await callLLM(state.conversation);
     state.conversation.push({ role: 'assistant', content: html });
 
-    state.currentHtml = stripScripts(html);
+    state.currentHtml = stripScripts(stripFences(html));
     renderAppHtml();
   }
 
   // ── Utilities ──
+
+  function stripFences(raw) {
+    let s = raw.trim();
+    s = s.replace(/^```(?:html)?\s*\n?/, '');
+    s = s.replace(/\n?```\s*$/, '');
+    return s;
+  }
 
   function stripScripts(html) {
     return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
