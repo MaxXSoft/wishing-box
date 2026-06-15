@@ -23,6 +23,7 @@
       baseUrl: (cfg.baseUrl || 'https://api.openai.com/v1').replace(/\/+$/, ''),
       apiKey: cfg.apiKey || '',
       model: cfg.model || 'gpt-4o',
+      extraParams: cfg.extraParams || {},
     };
   }
 
@@ -37,6 +38,7 @@
     cfgBaseUrl: $('#cfg-base-url'),
     cfgApiKey: $('#cfg-api-key'),
     cfgModel: $('#cfg-model'),
+    cfgExtraParams: $('#cfg-extra-params'),
     settingsSave: $('#settings-save'),
     settingsCancel: $('#settings-cancel'),
 
@@ -88,6 +90,7 @@
     els.cfgBaseUrl.value = cfg.baseUrl || '';
     els.cfgApiKey.value = cfg.apiKey || '';
     els.cfgModel.value = cfg.model || '';
+    els.cfgExtraParams.value = cfg.extraParams ? JSON.stringify(cfg.extraParams, null, 2) : '';
     els.settingsModal.classList.remove('hidden');
   }
 
@@ -102,10 +105,24 @@
   });
 
   els.settingsSave.addEventListener('click', () => {
+    const extraRaw = els.cfgExtraParams.value.trim();
+    let extraParams = {};
+    if (extraRaw) {
+      try {
+        extraParams = JSON.parse(extraRaw);
+        if (typeof extraParams !== 'object' || extraParams === null || Array.isArray(extraParams)) {
+          throw new Error('额外参数必须是一个 JSON 对象');
+        }
+      } catch (err) {
+        showError('额外参数 JSON 格式错误: ' + err.message);
+        return;
+      }
+    }
     saveConfig({
       baseUrl: els.cfgBaseUrl.value.trim(),
       apiKey: els.cfgApiKey.value.trim(),
       model: els.cfgModel.value.trim(),
+      extraParams: extraRaw ? extraParams : undefined,
     });
     closeSettings();
   });
@@ -142,6 +159,7 @@
         model: cfg.model,
         messages,
         temperature: 1,
+        ...cfg.extraParams,
       }),
     });
 

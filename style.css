@@ -154,8 +154,24 @@ html, body {
   transition: border-color var(--transition);
 }
 
-.modal input:focus {
+.modal input:focus,
+.modal textarea:focus {
   border-color: var(--primary);
+}
+
+.modal textarea {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+  outline: none;
+  resize: vertical;
+  transition: border-color var(--transition);
+  line-height: 1.5;
 }
 
 .modal-actions {

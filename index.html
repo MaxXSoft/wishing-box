@@ -28,6 +28,11 @@
         模型名称
         <input type="text" id="cfg-model" placeholder="gpt-4o">
       </label>
+      <label>
+        额外参数（JSON）
+        <textarea id="cfg-extra-params" placeholder='{"thinking": {"type": "disabled"}}' rows="5" spellcheck="false"></textarea>
+        <small style="color:#999;margin-top:2px;display:block">可选的 JSON 对象，会合并到请求体中。例如非官方 API 的思考模式开关</small>
+      </label>
       <div class="modal-actions">
         <button id="settings-save" class="btn btn-primary">保存</button>
         <button id="settings-cancel" class="btn">取消</button>
