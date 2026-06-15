@@ -190,12 +190,13 @@ Respond with ONLY the JSON array. No markdown fences, no extra text.`;
   const SYSTEM_APP = `You are the runtime engine of "许愿盒" (Wishing Box), a system that generates and runs interactive HTML applications powered entirely by LLM imagination. You will first design a detailed specification for an app, then generate its HTML, and then handle user interactions by producing diffs to update the HTML.
 
 General rules that apply to ALL your HTML output:
-1. ALL interactive elements (buttons, inputs, textareas, selects, links, checkboxes, radio buttons) MUST have unique "id" attributes.
+1. ALL interactive elements (buttons, links, inputs that are buttons, and any <div>/<span>/custom element that responds to clicks) MUST have unique "id" attributes AND class "clickable". Example: <button id="submit-btn" class="clickable"> or <div id="card-1" class="card clickable">.
 2. Do NOT include any <script> tags — the app contains no real code.
 3. Use a <style> tag for styling. Make it look polished and modern.
 4. The HTML must be self-contained. No external stylesheets or scripts (inline emoji/unicode is fine).
 5. Use the same language as the app name/description for all UI text.
-6. Fill in realistic-looking, creative placeholder content — this runs on imagination, not real data.`;
+6. Fill in realistic-looking, creative placeholder content — this runs on imagination, not real data.
+7. The system automatically collects values from ALL form elements that have an "id": <input> (any type: text, password, checkbox, radio, date, range, etc.), <textarea>, and <select> (both single and multiple). Every form element you want the system to sense MUST have a unique id.`;
 
   function buildSpecPrompt(app) {
     return `Please design a detailed specification for the following app:
@@ -400,6 +401,7 @@ Rules:
   function findActionable(el) {
     let cur = el;
     while (cur && cur !== cur.ownerDocument.body) {
+      if (cur.classList && cur.classList.contains('clickable')) return cur;
       if (ACTIONABLE.includes(cur.tagName)) return cur;
       if (cur.tagName === 'INPUT' && ACTIONABLE_INPUT_TYPES.includes(cur.type)) return cur;
       if (cur.getAttribute && cur.getAttribute('role') === 'button') return cur;
@@ -414,6 +416,8 @@ Rules:
       if (!el.id) return;
       if (el.type === 'checkbox' || el.type === 'radio') {
         values[el.id] = el.checked;
+      } else if (el.multiple && el.tagName === 'SELECT') {
+        values[el.id] = Array.from(el.selectedOptions).map((o) => o.value);
       } else {
         values[el.id] = el.value;
       }
