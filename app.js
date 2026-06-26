@@ -619,6 +619,6 @@ Rules:
     state.currentHtml = '';
     state.currentApp = null;
     state.conversation = [];
-    showScreen('candidates');
+    showScreen(state.candidates.length ? 'candidates' : 'home');
   });
 })();
