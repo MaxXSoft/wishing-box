@@ -355,6 +355,7 @@ Rules:
 
     els.appLoading.classList.remove('hidden');
     els.appIframe.srcdoc = '';
+    const loadingText = els.appLoading.querySelector('#app-loading-text');
 
     try {
       const cfg = getConfig();
@@ -362,16 +363,19 @@ Rules:
       let html;
 
       if (cfg.skipSpec) {
+        loadingText.textContent = '正在生成应用……';
         const htmlUserMsg = { role: 'user', content: buildDirectHtmlPrompt(app) };
         messages.push(htmlUserMsg);
         html = await callLLM(messages);
       } else {
+        loadingText.textContent = '正在生成应用描述……';
         const specUserMsg = { role: 'user', content: buildSpecPrompt(app) };
         messages.push(specUserMsg);
         const spec = await callLLM(messages);
         const specAssistantMsg = { role: 'assistant', content: spec };
         messages.push(specAssistantMsg);
 
+        loadingText.textContent = '正在生成应用……';
         const htmlUserMsg = { role: 'user', content: buildHtmlPrompt() };
         messages.push(htmlUserMsg);
         html = await callLLM(messages);
