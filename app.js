@@ -47,6 +47,7 @@
     screenHome: $('#screen-home'),
     searchInput: $('#search-input'),
     searchBtn: $('#search-btn'),
+    luckyBtn: $('#lucky-btn'),
 
     screenCandidates: $('#screen-candidates'),
     searchInputTop: $('#search-input-top'),
@@ -74,6 +75,7 @@
     currentHtml: '',
     conversation: [],
     loading: false,
+    luckyLoading: false,
   };
 
   // ── Screens ──
@@ -299,8 +301,29 @@ Rules:
     });
   }
 
+  function setLuckyLoading(loading) {
+    state.luckyLoading = loading;
+    els.luckyBtn.disabled = loading;
+    const textEl = els.luckyBtn.querySelector('.lucky-btn-text');
+    const spinnerEl = els.luckyBtn.querySelector('.spinner');
+    if (textEl) textEl.classList.toggle('hidden', loading);
+    if (spinnerEl) spinnerEl.classList.toggle('hidden', !loading);
+  }
+
+  async function generateLucky(query) {
+    if (state.loading || state.luckyLoading || !query.trim()) return;
+    state.query = query.trim();
+    setLuckyLoading(true);
+    try {
+      const app = { icon: '✨', name: state.query, description: state.query };
+      await openApp(app);
+    } finally {
+      setLuckyLoading(false);
+    }
+  }
+
   async function generateCandidates(query) {
-    if (state.loading || !query.trim()) return;
+    if (state.loading || state.luckyLoading || !query.trim()) return;
     state.query = query.trim();
 
     els.searchInput.value = state.query;
@@ -472,7 +495,7 @@ Rules:
   }
 
   async function handleInteraction(clickedId, doc) {
-    if (state.loading) return;
+    if (state.loading || state.luckyLoading) return;
     state.loading = true;
     els.appInteracting.classList.remove('hidden');
 
@@ -544,6 +567,7 @@ Rules:
   }
 
   els.searchBtn.addEventListener('click', () => onSearch(els.searchInput));
+  els.luckyBtn.addEventListener('click', () => generateLucky(els.searchInput.value));
   els.searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') onSearch(els.searchInput);
   });

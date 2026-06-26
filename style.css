@@ -258,10 +258,21 @@ html, body {
   box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
 }
 
-.search-bar .btn-primary {
+.search-bar .btn-primary,
+.search-bar .btn-lucky {
   border-radius: 999px;
   padding: 12px 24px;
   font-size: 15px;
+}
+
+.btn-lucky {
+  background: var(--card-bg);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.btn-lucky:hover {
+  background: #f0f0f0;
 }
 
 /* ── Candidates ── */
