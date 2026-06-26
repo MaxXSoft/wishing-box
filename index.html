@@ -84,15 +84,15 @@
     <div class="app-header">
       <button id="back-btn" class="btn btn-icon" title="返回">←</button>
       <span id="app-title" class="app-title"></span>
+      <div id="app-interacting" class="app-interacting hidden">
+        <div class="spinner small"></div>
+      </div>
     </div>
     <div class="app-container">
       <iframe id="app-iframe" sandbox="allow-same-origin"></iframe>
       <div id="app-loading" class="app-loading hidden">
         <div class="spinner large"></div>
         <p id="app-loading-text">正在生成应用……</p>
-      </div>
-      <div id="app-interacting" class="app-interacting hidden">
-        <div class="spinner small"></div>
       </div>
     </div>
   </div>

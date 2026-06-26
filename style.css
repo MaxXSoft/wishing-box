@@ -377,9 +377,7 @@ html, body {
 }
 
 .app-interacting {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+  margin-left: auto;
 }
 
 /* ── Spinner ── */
