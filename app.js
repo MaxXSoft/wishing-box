@@ -197,7 +197,8 @@ Respond with ONLY the JSON array. No markdown fences, no extra text.`;
 
 General rules that apply to ALL your HTML output:
 1. ALL interactive elements (buttons, links, inputs that are buttons, and any <div>/<span>/custom element that responds to clicks) MUST have unique "id" attributes AND class "clickable". Example: <button id="submit-btn" class="clickable"> or <div id="card-1" class="card clickable">.
-2. Do NOT include any <script> tags — the app contains no real code.
+   Missing "id" OR missing "clickable" will make clicks silently fail — both are required.
+2. STRICTLY FORBIDDEN: Do NOT include any <script> tags. No JavaScript whatsoever.
 3. Use a <style> tag for styling. Make it look polished and modern.
 4. The HTML must be self-contained. No external stylesheets or scripts (inline emoji/unicode is fine).
 5. Use the same language as the app name/description for all UI text.
@@ -418,6 +419,7 @@ Rules:
   }
 
   function renderAppHtml() {
+    state.currentHtml = ensureClickableIds(state.currentHtml);
     els.appIframe.srcdoc = state.currentHtml;
     els.appIframe.onload = () => attachIframeListeners();
   }
@@ -551,7 +553,40 @@ Rules:
   }
 
   function stripScripts(html) {
-    return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    // Remove all <script>...</script> blocks (handles well-formed and unclosed ones)
+    while (true) {
+      const startIdx = html.search(/<script\b[^>]*>/i);
+      if (startIdx === -1) break;
+      const endIdx = html.toLowerCase().indexOf('</script>', startIdx);
+      if (endIdx !== -1) {
+        html = html.slice(0, startIdx) + html.slice(endIdx + 9);
+      } else {
+        // Unclosed <script> — remove everything from the opening tag onward
+        html = html.slice(0, startIdx);
+      }
+    }
+    return html;
+  }
+
+  function ensureClickableIds(html) {
+    // Find max existing auto index to avoid duplicates across calls
+    const autoRE = /id="auto-(\d+)"/g;
+    let maxAuto = -1, m;
+    while ((m = autoRE.exec(html)) !== null) {
+      maxAuto = Math.max(maxAuto, parseInt(m[1], 10));
+    }
+    let counter = maxAuto + 1;
+    return html.replace(
+      /<([a-zA-Z][a-zA-Z0-9_-]*)\b([^>]*?)class\s*=\s*"([^"]*?)"([^>]*?)>/g,
+      (match, tagName, before, classes, after) => {
+        if (!classes.includes('clickable')) return match;
+        if (/\bid\s*=\s*"/i.test(before + after)) return match;
+        const dataVal = (before + after).match(/\bdata-val\s*=\s*"([^"]*)"/i);
+        const dataAction = (before + after).match(/\bdata-action\s*=\s*"([^"]*)"/i);
+        const suffix = dataVal ? dataVal[1] : (dataAction ? dataAction[1] : 'auto-' + (counter++));
+        return `<${tagName}${before}class="${classes}"${after} id="${suffix}">`;
+      }
+    );
   }
 
   function escapeHtml(str) {
